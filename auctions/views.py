@@ -3,12 +3,32 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.utils import timezone
 
-from .models import User
-
+from .models import User, Auction, Bid, Comment
+from .forms import AuctionForm
 
 def index(request):
-    return render(request, "auctions/index.html")
+    active_auctions = Auction.objects.all()
+    return render(request, "auctions/index.html", {
+        "auctions": active_auctions
+    })
+
+def create_listing(request):
+    form = AuctionForm(request.POST or None)
+
+    if form.is_valid():
+        new_listing = form.save(commit=False)
+        new_listing.user = request.user
+        new_listing.start_time = timezone.now()
+        new_listing.save()
+
+        return HttpResponseRedirect(reverse("index"))
+
+    else:
+        return render(request, "auctions/create_listing.html", {
+            'form': form
+        })
 
 
 def login_view(request):
