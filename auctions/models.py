@@ -10,10 +10,12 @@ class User(AbstractUser):
 class Auction(models.Model):
     item_name = models.CharField(max_length=64)
     item_description = models.TextField(max_length=800)
-    start_time = models.DateTimeField()
+    start_time = models.DateTimeField(auto_now_add=True)
     start_bid = models.DecimalField(max_digits=7, decimal_places=2,
                                     validators=[MinValueValidator(0.01)])
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="auctions")
+    watchers = models.ManyToManyField(User, blank=True, related_name="watchlist")
+
 
     def __str__(self):
         return f"Auction #{self.id}: {self.item_name} ({self.user.username})"

@@ -2,9 +2,18 @@
 
 {% block body %}
     <h2>Active Listings</h2>
-    <ul>
+    <div class="d-flex flex-wrap">
         {% for auction in auctions %}
-            <li>{{ auction }}</li>
+        <div class="card p-4 m-2 col-lg-3 col-md-4 col-sm-12">
+            <h4><a href="{% url 'auction' auction.id %}">{{ auction.item_name }}</a></h4>
+                <h5>Price: £{{ auction.start_bid}}</h5>
+
+                <p>{{ auction.item_description }}</p>
+
+                <small class="card-text muted">
+                    Created on {{ auction.start_time }}
+                </small>
+        </div>
         {% endfor %}
-    </ul>
+    </div>
 {% endblock %}

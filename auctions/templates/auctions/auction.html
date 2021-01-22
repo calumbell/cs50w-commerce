@@ -1,0 +1,30 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h3> {{ auction.item_name }} </h3>
+    <small>Sold by <b>{{ auction.user }}</b> </small>
+    <h5> Current Bid: £{{ auction.start_bid }} </h5>
+
+
+    <form>
+        {% csrf_token %}
+        <div class="form-group">
+            <small>Bids: 0</small>
+            <!-- TODO create a ModelForm for Bids -->
+            <input type="submit" value="Place Bid" />
+        </div>
+    </form>
+
+    <div><small>Started {{ auction.start_time }}</small></div>
+
+    <p> {{ auction.item_description }} </p>
+
+    {% if request.user.is_authenticated %}
+        <form>
+            {% csrf_token%}
+            <!-- TODO watchlist -->
+            <input type="submit" value="Add to Watchlist" />
+        </form>
+    {% endif %}
+
+{% endblock %}

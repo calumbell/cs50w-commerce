@@ -3,7 +3,6 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
-from django.utils import timezone
 
 from .models import User, Auction, Bid, Comment
 from .forms import AuctionForm
@@ -14,13 +13,21 @@ def index(request):
         "auctions": active_auctions
     })
 
+def auction(request, id):
+    try:
+        auction = Auction.objects.get(id=id)
+    except:
+        return HttpResponse("Entry does not exist")
+    return render(request, "auctions/auction.html", {
+        "auction" : auction
+    })
+
 def create_listing(request):
     form = AuctionForm(request.POST or None)
 
     if form.is_valid():
         new_listing = form.save(commit=False)
         new_listing.user = request.user
-        new_listing.start_time = timezone.now()
         new_listing.save()
 
         return HttpResponseRedirect(reverse("index"))
