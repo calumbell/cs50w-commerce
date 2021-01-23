@@ -1,29 +1,72 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <h3> {{ auction.item_name }} </h3>
+    <h2> {{ auction.item_name }} </h2>
     <small>Sold by <b>{{ auction.user }}</b> </small>
-    <h5> Current Bid: £{{ auction.start_bid }} </h5>
+    <h5>
+        Current Bid: £
+        {% if auction.bids.all.count > 0 %}
+            {{ auction.bids.first.amount }}
+        {% else %}
+            {{ auction.start_bid }}
+        {% endif %}
+
+        <small>
+            Bids: {{ auction.bids.all.count }}
+        </small>
+    </h5>
 
 
-    <form>
+    <form method="POST" action="{% url 'auction_bid' auction.id %}">
         {% csrf_token %}
         <div class="form-group">
-            <small>Bids: 0</small>
-            <!-- TODO create a ModelForm for Bids -->
-            <input type="submit" value="Place Bid" />
+
+            {{ bid_form.amount }}
+
+            <input class="btn btn-primary" type="submit" value="Place Bid" />
         </div>
     </form>
 
-    <div><small>Started {{ auction.start_time }}</small></div>
+    <!-- <div><small>Started {{ auction.start_time }}</small></div> -->
 
+    <h3>Item Description</h3>
     <p> {{ auction.item_description }} </p>
 
     {% if request.user.is_authenticated %}
         <form>
             {% csrf_token%}
             <!-- TODO watchlist -->
-            <input type="submit" value="Add to Watchlist" />
+            <input class="btn btn-secondary" type="submit" value="Add to Watchlist" />
+        </form>
+
+
+    <h3>Comments</h3>
+        <form method="POST" action="{% url 'post_comment' auction.id %}">
+            {% csrf_token %}
+            <div class="form-group">
+                {{ comment_form.message }}
+                <div>
+                    <input class="form-group btn" type="submit" value="Post a comment" />
+                </div>
+            </div>
+        </form>
+    {% endif %}
+
+
+    {% for comment in auction.comments.all %}
+        <div class="card p-3 m-2 col-lg-12 col-sm-12">
+            {{ comment }}
+        </div>
+    {% endfor %}
+
+
+
+
+    <form method="POST">
+    {% if request.user == auction.user %}
+        <form>
+            {% csrf_token %}
+            <input class="btn btn-danger" type="submit" value="End Auction" />
         </form>
     {% endif %}
 
