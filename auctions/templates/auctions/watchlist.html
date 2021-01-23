@@ -1,0 +1,23 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Watchlist</h2>
+
+    <ul>
+        {% for auction in watchlist %}
+            <div class="card p-2 col-lg-10 col-sm-10">
+
+                 <a href="{% url 'auction' auction.id %}">
+                     {{ auction.item_name }}
+                 </a>
+
+                 £
+                 {% if auction.bids.all.count > 0 %}
+                     {{ auction.bids.first.amount }}
+                 {% else %}
+                     {{ auction.start_bid }}
+                 {% endif %}
+            </div>
+        {% endfor %}
+    </ul>
+{% endblock %}

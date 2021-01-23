@@ -112,7 +112,7 @@ def register(request):
         confirmation = request.POST["confirmation"]
         if password != confirmation:
             return render(request, "auctions/register.html", {
-                "message": "Passwords must match."
+                "message" : "Passwords must match."
             })
 
         # Attempt to create new user
@@ -121,9 +121,28 @@ def register(request):
             user.save()
         except IntegrityError:
             return render(request, "auctions/register.html", {
-                "message": "Username already taken."
+                "message" : "Username already taken."
             })
         login(request, user)
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "auctions/register.html")
+
+def watch_auction(request, id):
+    if request.method == "POST":
+        auction = Auction.objects.get(id=id)
+        watchlist = request.user.watchlist
+        if auction in watchlist.all():
+            watchlist.remove(auction)
+        else:
+            watchlist.add(auction)
+
+    url = reverse('auction', kwargs={'id': id})
+    return HttpResponseRedirect(url)
+
+
+def watchlist(request):
+    return render(request, "auctions/watchlist.html", {
+        "user" : request.user,
+        "watchlist" : request.user.watchlist.all()
+    })

@@ -1,23 +1,45 @@
 {% extends "auctions/layout.html" %}
 
+{% block title %} {{ auction.item_name }} {% endblock %}
+
 {% block body %}
-    <h2> {{ auction.item_name }} </h2>
+    <h1> {{ auction.item_name }} </h1>
+
+    {% if request.user.is_authenticated %}
+        <form method="POST" action="{% url 'watch_auction' auction.id %}" class="form-inline">
+            {% csrf_token%}
+            {% if auction in request.user.watchlist.all %}
+                <input class="btn btn-secondary btn-sm" type="submit" value="Remove from Watchlist" />
+            {% else %}
+                <input class="btn btn-secondary btn-sm" type="submit" value="Add to Watchlist" />
+            {% endif %}
+        </form>
+    {% endif %}
+
+    <p> {{ auction.item_description }} </p>
+
     <small>Sold by <b>{{ auction.user }}</b> </small>
-    <h5>
-        Current Bid: £
+
+    <h3>
+        £
         {% if auction.bids.all.count > 0 %}
             {{ auction.bids.first.amount }}
         {% else %}
             {{ auction.start_bid }}
         {% endif %}
-
-        <small>
-            Bids: {{ auction.bids.all.count }}
-        </small>
-    </h5>
+    </h3>
 
 
-    <form method="POST" action="{% url 'auction_bid' auction.id %}">
+
+
+    <small>
+        Bids: {{ auction.bids.all.count }}.
+        {% if auction.bids.first.user == request.user %}
+            Your bid is the current bid.
+        {% endif %}
+    </small>
+
+    <form method="POST" action="{% url 'auction_bid' auction.id %}" class="form-inline">
         {% csrf_token %}
         <div class="form-group">
 
@@ -27,20 +49,9 @@
         </div>
     </form>
 
-    <!-- <div><small>Started {{ auction.start_time }}</small></div> -->
-
-    <h3>Item Description</h3>
-    <p> {{ auction.item_description }} </p>
-
-    {% if request.user.is_authenticated %}
-        <form>
-            {% csrf_token%}
-            <!-- TODO watchlist -->
-            <input class="btn btn-secondary" type="submit" value="Add to Watchlist" />
-        </form>
-
 
     <h3>Comments</h3>
+    {% if request.user.is_authenticated %}
         <form method="POST" action="{% url 'post_comment' auction.id %}">
             {% csrf_token %}
             <div class="form-group">
@@ -58,9 +69,6 @@
             {{ comment }}
         </div>
     {% endfor %}
-
-
-
 
     <form method="POST">
     {% if request.user == auction.user %}
