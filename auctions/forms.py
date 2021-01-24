@@ -6,7 +6,8 @@ class AuctionForm(ModelForm):
         model = Auction
         fields = ['item_name',
                   'item_description',
-                  'start_bid']
+                  'start_bid',
+                  'duration']
 
     def __init__(self, *args, **kwargs):
         super(AuctionForm, self).__init__(*args, **kwargs)

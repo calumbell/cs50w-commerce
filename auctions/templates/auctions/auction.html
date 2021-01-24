@@ -1,9 +1,27 @@
 {% extends "auctions/layout.html" %}
+{% load mathfilters %}
 
 {% block title %} {{ auction.item_name }} {% endblock %}
 
 {% block body %}
     <h1> {{ auction.item_name }} </h1>
+
+    {% if not ended %}
+        <div>
+
+            Time Left:
+                {{ days }}d
+                {{ hours }}h
+                {{ minutes }}m
+
+        </div>
+
+        <div>
+            Auction ends at: {{ auction.end_time }}
+        </div>
+    {% else %}
+        <div><b>This auction has ended</b></div>
+    {% endif %}
 
     {% if request.user.is_authenticated %}
         <form method="POST" action="{% url 'watch_auction' auction.id %}" class="form-inline">
@@ -30,28 +48,28 @@
     </h3>
 
 
-
-
-    <small>
         Bids: {{ auction.bids.all.count }}.
         {% if auction.bids.first.user == request.user %}
-            Your bid is the current bid.
+            {% if not ended %}
+                Your bid is the current bid.
+            {% else %}
+                <b>You won the auction!</b>
+            {% endif %}
         {% endif %}
-    </small>
 
-    <form method="POST" action="{% url 'auction_bid' auction.id %}" class="form-inline">
-        {% csrf_token %}
-        <div class="form-group">
 
-            {{ bid_form.amount }}
-
-            <input class="btn btn-primary" type="submit" value="Place Bid" />
-        </div>
-    </form>
-
+    {% if request.user.is_authenticated and not ended %}
+        <form method="POST" action="{% url 'auction_bid' auction.id %}" class="form-inline">
+            {% csrf_token %}
+            <div class="form-group">
+                {{ bid_form.amount }}
+                <input class="btn btn-primary" type="submit" value="Place Bid" />
+            </div>
+        </form>
+    {% endif %}
 
     <h3>Comments</h3>
-    {% if request.user.is_authenticated %}
+    {% if request.user.is_authenticated and not ended %}
         <form method="POST" action="{% url 'post_comment' auction.id %}">
             {% csrf_token %}
             <div class="form-group">
@@ -70,9 +88,9 @@
         </div>
     {% endfor %}
 
-    <form method="POST">
-    {% if request.user == auction.user %}
-        <form>
+
+    {% if request.user == auction.user and not ended %}
+        <form method="POST" action= "{% url 'close_auction' auction.id %}">
             {% csrf_token %}
             <input class="btn btn-danger" type="submit" value="End Auction" />
         </form>

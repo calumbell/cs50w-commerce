@@ -3,12 +3,18 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from datetime import datetime, timedelta
+from django.utils import timezone
 
 from .models import User, Auction, Bid, Comment
 from .forms import AuctionForm, BidForm, CommentForm
 
 def index(request):
-    active_auctions = Auction.objects.all()
+    active_auctions = Auction.objects.filter(
+        ended_manually=False,
+        end_time__gte=datetime.now()
+    )
+
     return render(request, "auctions/index.html", {
         "auctions": active_auctions
     })
@@ -19,11 +25,21 @@ def auction(request, id):
     except:
         return HttpResponse("Entry does not exist")
 
-    return render(request, "auctions/auction.html", {
-        "auction" : auction,
-        "bid_form" : BidForm(),
-        "comment_form" : CommentForm()
-    })
+    context = {}
+    context["auction"] = auction
+
+    if auction.ended_manually or timezone.now() > auction.end_time:
+        context["ended"] = True
+    else:
+        context["ended"] = False
+        time_remaining = auction.end_time - timezone.now()
+        context["days"] = time_remaining.days
+        context["hours"] = int(time_remaining.seconds / 3600)
+        context["minutes"] = int(time_remaining.seconds / 60 - (context["hours"] * 60))
+        context["bid_form"] = BidForm()
+        context["comment_form"] = CommentForm()
+
+    return render(request, "auctions/auction.html", context)
 
 def auction_bid(request, id):
     bid_form = BidForm(request.POST or None)
@@ -44,7 +60,14 @@ def auction_bid(request, id):
     url = reverse('auction', kwargs={'id': id})
     return HttpResponseRedirect(url)
 
+def auction_close(request, id):
+    auction = Auction.objects.get(id=id)
+    if request.user == auction.user:
+        auction.ended_manually = True
+        auction.save()
 
+    url = reverse('auction', kwargs={'id': id} )
+    return HttpResponseRedirect(url)
 
 def auction_comment(request, id):
     comment_form = CommentForm(request.POST or None)
@@ -59,10 +82,8 @@ def auction_comment(request, id):
     return HttpResponseRedirect(url)
 
 
-
 def create_listing(request):
     form = AuctionForm(request.POST or None)
-
     if form.is_valid():
         new_listing = form.save(commit=False)
         new_listing.user = request.user

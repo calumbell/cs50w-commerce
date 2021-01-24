@@ -27,4 +27,4 @@ python manage.py runserver
 
 ### Requirements
 
-This website was built with [Django](https://github.com/django/django)
+This website was built using the [Django](https://github.com/django/django) framework.

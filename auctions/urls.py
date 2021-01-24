@@ -6,6 +6,7 @@ urlpatterns = [
     path("", views.index, name="index"),
     path("auction/<str:id>", views.auction, name="auction"),
     path("auction/<str:id>/bid", views.auction_bid, name="auction_bid"),
+    path("auction/<str:id>/close", views.auction_close, name="close_auction"),
     path("auction/<str:id>/comment", views.auction_comment, name="post_comment"),
     path("auction/<str:id>/watch", views.watch_auction, name="watch_auction"),
     path("create_listing", views.create_listing, name="create_listing"),

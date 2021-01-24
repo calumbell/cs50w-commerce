@@ -10,7 +10,6 @@
                  <a href="{% url 'auction' auction.id %}">
                      {{ auction.item_name }}
                  </a>
-
                  £
                  {% if auction.bids.all.count > 0 %}
                      {{ auction.bids.first.amount }}
