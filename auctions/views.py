@@ -6,7 +6,7 @@ from django.urls import reverse
 from datetime import datetime, timedelta
 from django.utils import timezone
 
-from .models import User, Auction, Bid, Comment
+from .models import Auction, Bid, Category, Comment, User
 from .forms import AuctionForm, BidForm, CommentForm
 
 def index(request):
@@ -15,29 +15,35 @@ def index(request):
         end_time__gte=datetime.now()
     )
 
-    return render(request, "auctions/index.html", {
-        "auctions": active_auctions
+    return render(request, "auctions/auction_list.html", {
+        "auctions": active_auctions,
+        "title" : "Active Auctions"
     })
 
 def auction(request, id):
+    # check that auction exists
     try:
         auction = Auction.objects.get(id=id)
     except:
         return HttpResponse("Entry does not exist")
 
+
     context = {}
     context["auction"] = auction
 
-    if auction.ended_manually or timezone.now() > auction.end_time:
+    if auction.is_finshed():
         context["ended"] = True
-    else:
-        context["ended"] = False
-        time_remaining = auction.end_time - timezone.now()
-        context["days"] = time_remaining.days
-        context["hours"] = int(time_remaining.seconds / 3600)
-        context["minutes"] = int(time_remaining.seconds / 60 - (context["hours"] * 60))
-        context["bid_form"] = BidForm()
-        context["comment_form"] = CommentForm()
+        return render(request, "auctions/auction.html", context)
+
+    context["ended"] = False
+
+    # calculate times
+    time_remaining = auction.end_time - timezone.now()
+    context["days"] = time_remaining.days
+    context["hours"] = int(time_remaining.seconds / 3600)
+    context["minutes"] = int(time_remaining.seconds / 60 - (context["hours"] * 60))
+    context["bid_form"] = BidForm()
+    context["comment_form"] = CommentForm()
 
     return render(request, "auctions/auction.html", context)
 
@@ -72,6 +78,7 @@ def auction_close(request, id):
 def auction_comment(request, id):
     comment_form = CommentForm(request.POST or None)
 
+    # add comment to database
     if comment_form.is_valid():
         new_comment = comment_form.save(commit=False)
         new_comment.auction = Auction.objects.get(id=id)
@@ -81,6 +88,22 @@ def auction_comment(request, id):
     url = reverse('auction', kwargs={'id': id})
     return HttpResponseRedirect(url)
 
+def category(request, name):
+    category = Category.objects.get(name=name)
+    auctions = Auction.objects.filter(
+        category=category,
+        ended_manually=False,
+        end_time__gte=datetime.now()
+    )
+    return render(request, "auctions/auction_list.html", {
+        "auctions" : auctions,
+        "title" : category.name
+    })
+
+def categories_list(request):
+    return render(request, "auctions/category_list.html", {
+        "categories" : Category.objects.all()
+    })
 
 def create_listing(request):
     form = AuctionForm(request.POST or None)
