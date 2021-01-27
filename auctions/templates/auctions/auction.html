@@ -13,6 +13,10 @@
         <div>Auction ends at: {{ auction.end_time }}</div>
     {% endif %}
 
+    {% if auction.image %}
+        <img src="{{ auction.image.url }}">
+    {% endif %}
+
     {% if request.user.is_authenticated %}
         <form method="POST" action="{% url 'watch_auction' auction.id %}" class="form-inline">
             {% csrf_token%}

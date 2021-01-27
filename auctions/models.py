@@ -25,6 +25,11 @@ class Category(models.Model):
 class Auction(models.Model):
     item_name        = models.CharField(max_length=64)
     item_description = models.TextField(max_length=800)
+    image            = models.ImageField(
+                          null = True,
+                          upload_to =''
+                       )
+
     category         = models.ForeignKey(
                           Category,
                           blank=True,
@@ -41,7 +46,7 @@ class Auction(models.Model):
         (14, "Two Weeks"),
         (28, "Four Weeks")
     )
-    
+
     duration         = models.IntegerField(choices=DURATIONS)
     ended_manually   = models.BooleanField(default=False)
     start_bid        = models.DecimalField(

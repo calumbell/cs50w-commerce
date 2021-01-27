@@ -121,3 +121,8 @@ USE_TZ = False
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+# https://docs.djangoproject.com/en/3.1/ref/settings/#std:setting-MEDIA_ROOT
+MEDIA_ROOT = 'auctions/images/'
+MEDIA_URL = '/media/'

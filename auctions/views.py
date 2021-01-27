@@ -106,7 +106,7 @@ def categories_list(request):
     })
 
 def create_listing(request):
-    form = AuctionForm(request.POST or None)
+    form = AuctionForm(request.POST or None, request.FILES or None)
     if form.is_valid():
         new_listing = form.save(commit=False)
         new_listing.user = request.user

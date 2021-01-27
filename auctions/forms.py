@@ -5,10 +5,11 @@ class AuctionForm(ModelForm):
     class Meta:
         model = Auction
         fields = ['item_name',
+                  'image',
                   'item_description',
-                  'category',
                   'start_bid',
-                  'duration',]
+                  'duration',
+                  'category']
 
     def __init__(self, *args, **kwargs):
         super(AuctionForm, self).__init__(*args, **kwargs)
