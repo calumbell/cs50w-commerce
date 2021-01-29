@@ -186,7 +186,7 @@ def watch_auction(request, id):
 
 
 def watchlist(request):
-    return render(request, "auctions/watchlist.html", {
-        "user" : request.user,
-        "watchlist" : request.user.watchlist.all()
+    return render(request, "auctions/auction_list.html", {
+        "auctions" : request.user.watchlist.all(),
+        "title" : "Watchlist"
     })

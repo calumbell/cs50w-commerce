@@ -18,14 +18,16 @@ class Category(models.Model):
     def __str__(self):
         return f"{self.name}"
 
+    @property
     def count_active_auctions(self):
-        pass
+        return Auction.objects.filter(category=self).count()
 
 
 class Auction(models.Model):
     item_name        = models.CharField(max_length=64)
     item_description = models.TextField(max_length=800)
     image            = models.ImageField(
+                          blank = True,
                           null = True,
                           upload_to =''
                        )
@@ -64,7 +66,9 @@ class Auction(models.Model):
                           blank=True,
                           related_name="watchlist"
                        )
-
+    class Meta:
+        ordering = ('-end_time',)
+        
     def __str__(self):
         return f"Auction #{self.id}: {self.item_name} ({self.user.username})"
 
@@ -98,6 +102,9 @@ class Comment(models.Model):
     time    = models.DateTimeField(auto_now_add=True)
     user    = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
     auction = models.ForeignKey(Auction, on_delete=models.CASCADE, related_name="comments")
+
+    class Meta:
+        ordering = ('-time',)
 
     def __str__(self):
         return f"Comment #{self.id}: {self.user.username} on {self.auction.item_name}: {self.message}"

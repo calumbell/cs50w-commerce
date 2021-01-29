@@ -14,18 +14,21 @@
     {% endif %}
 
     {% if auction.image %}
-        <img src="{{ auction.image.url }}">
+        <img class="my-2" src="{{ auction.image.url }}">
     {% endif %}
 
+    <!-- Watchlist -->
     {% if request.user.is_authenticated %}
-        <form method="POST" action="{% url 'watch_auction' auction.id %}" class="form-inline">
-            {% csrf_token%}
-            {% if auction in request.user.watchlist.all %}
-                <input class="btn btn-secondary btn-sm" type="submit" value="Remove from Watchlist" />
-            {% else %}
-                <input class="btn btn-secondary btn-sm" type="submit" value="Add to Watchlist" />
-            {% endif %}
-        </form>
+        <div class="my-2">
+            <form method="POST" action="{% url 'watch_auction' auction.id %}" class="form-inline">
+                {% csrf_token%}
+                {% if auction in request.user.watchlist.all %}
+                    <input class="btn btn-secondary btn-sm" type="submit" value="Remove from Watchlist" />
+                {% else %}
+                    <input class="btn btn-secondary btn-sm" type="submit" value="Add to Watchlist" />
+                {% endif %}
+            </form>
+        </div>
     {% endif %}
 
     <p> {{ auction.item_description }} </p>
@@ -40,14 +43,14 @@
     </h3>
 
 
-        Bids: {{ auction.bids.all.count }}.
-        {% if auction.bids.first.user == request.user %}
-            {% if not ended %}
-                Your bid is the current bid.
-            {% else %}
-                <b>You won the auction!</b>
-            {% endif %}
+    Bids: {{ auction.bids.all.count }}.
+    {% if auction.bids.first.user == request.user %}
+        {% if not ended %}
+            Your bid is the current bid.
+        {% else %}
+            <b>You won the auction!</b>
         {% endif %}
+    {% endif %}
 
     {% if request.user.is_authenticated and not ended %}
         <form method="POST" action="{% url 'auction_bid' auction.id %}" class="form-inline">
@@ -73,32 +76,41 @@
             {% endif %}
         </li>
     </ul>
-    <h3>Comments</h3>
-    {% if request.user.is_authenticated and not ended %}
-        <form method="POST" action="{% url 'post_comment' auction.id %}">
-            {% csrf_token %}
-            <div class="form-group">
-                {{ comment_form.message }}
-                <div>
-                    <input class="form-group btn" type="submit" value="Post a comment" />
-                </div>
-            </div>
-        </form>
-    {% endif %}
-
-
-    {% for comment in auction.comments.all %}
-        <div class="card p-3 m-2 col-lg-12 col-sm-12">
-            {{ comment }}
-        </div>
-    {% endfor %}
-
 
     {% if request.user == auction.user and not ended %}
         <form method="POST" action= "{% url 'close_auction' auction.id %}">
             {% csrf_token %}
-            <input class="btn btn-danger" type="submit" value="End Auction" />
+            <input class="btn btn-danger" type="submit" value="End Auction Early" />
         </form>
     {% endif %}
+
+    <hr>
+
+    <div id="comments-section" class="bg-light">
+        <h3 class="py-4">Comments <span class="badge badge-secondary badge-pill mx-1">{{ auction.comments.count }}</span></h3>
+
+        {% if request.user.is_authenticated and not ended %}
+            <form method="POST" action="{% url 'post_comment' auction.id %}">
+                {% csrf_token %}
+                <div class="form-group"  style="height: 160px;">
+                    {{ comment_form.message }}
+                    <div>
+                        <input class="btn btn-primary p-2 m-2" type="submit" value="Post a comment" />
+                    </div>
+                </div>
+            </form>
+        {% endif %}
+        <div class="py-2">
+        {% for comment in auction.comments.all %}
+            <div class="card p-1 m-2 col-lg-12 col-sm-12">
+                <div class="card-body">
+                    <h5 class="card-title">{{ comment.user }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ comment.time }}</h6>
+                    {{ comment.message }}
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+    </div>
 
 {% endblock %}

@@ -6,19 +6,20 @@
         {% for auction in auctions %}
             <div class="card p-4 m-2 col-lg-3 col-md-4 col-sm-12">
                 <h4><a href="{% url 'auction' auction.id %}">{{ auction.item_name }}</a></h4>
-                    <h5>Price: £
-                        {% if auction.bids.all.count > 0 %}
-                            {{ auction.bids.first.amount }}
-                        {% else %}
-                            {{ auction.start_bid }}
-                        {% endif %}
-                    </h5>
+                <img src="{{ auction.image.url }}">
+                <h5 class="my-2">
+                    {% if auction.bids.all.count > 0 %}
+                        £ {{ auction.bids.first.amount }}
+                    {% else %}
+                        £ {{ auction.start_bid }}
+                    {% endif %}
+                </h5>
 
-                    <p>{{ auction.item_description }}</p>
-
-                    <small class="card-text muted">
-                        Auction ends {{ auction.end_time }}
-                    </small>
+                <p class="">{{ auction.item_description }}</p>
+                <small class="card-text muted">
+                    Ends {{ auction.end_time }}
+                </small>
+                <a href="{% url 'category' auction.category %}"<span class="badge badge-secondary badge-pill">{{ auction.category }}</span></a>
             </div>
         {% endfor %}
     </div>
